@@ -27,6 +27,11 @@ class DataBase:
         return await cursor.fetchone()
 
     @classmethod
+    async def get_users(cls):
+        cursor = await cls.con.execute("SELECT * FROM users")
+        return await cursor.fetchall()
+
+    @classmethod
     async def update_user_id_1win(cls, user_id: int, user_id_1win: int):
         await cls.con.execute("UPDATE users SET user_id_1win = ? WHERE user_id = ?", (user_id_1win, user_id))
         await cls.con.commit()
