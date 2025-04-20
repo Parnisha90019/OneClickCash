@@ -1,22 +1,20 @@
-from typing import Any
+from aiogram import types
 from aiogram.filters import BaseFilter
-from aiogram import types, Bot
-from config import CHANNEL_ID, ADMIN_ID
+from config import CHANNEL_ID
 from database.db import DataBase
 
 class ChatJoinFilter(BaseFilter):
-    async def __call__(self, message: types.Message, bot: Bot) -> Any:
-        chat_member = await bot.get_chat_member(chat_id=CHANNEL_ID,
-                                                user_id=message.from_user.id)
-        if (chat_member.status.value == "member" or
-                chat_member.status.value == "creator"):
-            return True
-        return False
+    async def __call__(self, message: types.Message) -> bool:
+        try:
+            member = await message.bot.get_chat_member(chat_id=CHANNEL_ID, user_id=message.from_user.id)
+            return member.status != 'left'
+        except:
+            return False
 
 class RegisteredFilter(BaseFilter):
-    async def __call__(self, callback: types.CallbackQuery) -> Any:
-        # Пропускаем пользователя с ADMIN_ID без регистрации
-        if callback.from_user.id == ADMIN_ID:
-            return True
-        # Для остальных пользователей проверяем регистрацию в базе данных
-        return not await DataBase.get_user(callback.from_user.id) is None
+    async def __call__(self, message: types.Message) -> bool:
+        return bool(await DataBase.get_user(message.from_user.id))
+
+class DepositFilter(BaseFilter):
+    async def __call__(self, message: types.Message) -> bool:
+        return bool(await DataBase.has_deposited(message.from_user.id))
