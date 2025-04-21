@@ -60,7 +60,7 @@ app = web.Application()
 app.router.add_post("/callback", handle_postback)
 
 async def on_startup(_):
-    await DataBase.on_startup(_)
+    await DataBase.on_startup()
     logging.info("Бот запущен")
 
 async def on_shutdown(_):
